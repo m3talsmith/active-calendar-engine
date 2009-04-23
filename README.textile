@@ -1,0 +1,15 @@
+h1. ActiveCalendar Introduction
+
+ActiveCalendar is designed to treat calendars in the same manner that ActiveRecord treats normal records. This is designed first and foremost to be used with Google Calendar.
+
+*This project is brand new and unusable right now. I will remove this when it's ready for some sort of use in the very near future. At that point I'll also update this with examples and so on.*
+
+h2. Credits
+
+Here is a list of people that I have either borrowed from or used as inspiration for this project:
+
+* "zoriorz":mailto:zoriorz@gmail.com and his "gcalapi":http://rubyforge.org/projects/gcalapi/ project.
+* "francisoud":http://github.com/francisoud and his "Googlecalendar":http://github.com/francisoud/googlecalendar project. This is the project that sparked me in to acting on ActiveCalendar.
+* "maiha":http://github.com/maiha for the simple idea of making helpers for views to easily tap in to this kind of functionality with his "tdiary":http://github.com/maiha/tdiary_google_calendar_plugin/ project.
+
+h5. Copyright (c) 2009 Michael Christenson II ( michael@theurbanrebellion.com ), released under the MIT license
