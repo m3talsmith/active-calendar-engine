@@ -18,6 +18,15 @@ module ActiveCalendarEngine
       attr_accessors :google_service, :google_feed
     # --
     
+    def initialize
+      %w(google_service google_feed).each do |accessor|
+        self.instance_variable_set(
+          "@#{accessor}",
+          self.class.instance_variable_get("@#{accessor}")
+        )
+      end
+    end
+    
     class << self
       
       def find(*args)
