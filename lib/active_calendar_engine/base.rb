@@ -1,32 +1,58 @@
 require "active_support"
+require "active_calendar_engine/tools/accessor"
 
 Net::HTTP.version_1_2
 
 module ActiveCalendarEngine
   
   class Base
+    extend Accessor
+    include Accessor
     
     # -- Constants --
       AUTHENTICATION_SERVER = "https://www.google.com:443"
       AUTHENTICATION_PATH   = "/accounts/ClientLogin"
     # --
     
+    # -- Default Accessors --
+      attr_accessors :google_service, :google_feed
+    # --
+    
     class << self
+      
       def find(*args)
         options = args.extract_options!
-        
+        find_or_setup_default_options(options)
+
         case args.first
         when :all
-          
-          data = get_authenticated_feed("http://www.google.com/calendar/feeds/default/allcalendars/full")
-          puts data.body
-          
+          response, data = get_authenticated_feed(@google_feed)
+          @data = {:response => response, :data => data}
         end
+
+        return @data ? @data : false
+      end
+      
+      def has_google_options(*args)
+        google_options(args.extract_options!)
       end
     end
     
     private
       class << self
+        
+        def google_options(options)
+          options.each_pair do |key, value|
+            instance_variable_set("@#{key}", value)
+          end
+        end
+        
+        def find_or_setup_default_options(options = nil)
+          @google_service ||= nil
+          @google_feed    ||= nil
+          
+          self.google_options options
+        end
         
         def preferences
           unless @google_credentials
@@ -43,7 +69,7 @@ module ActiveCalendarEngine
               "&Email=#{preferences[:email]}" \
               "&Passwd=#{preferences[:password]}" \
               "&source=ActiveCalendarEngine-0001" \
-              "&service=cl"
+              "&service=#{@google_service}"
 
             secure_headers  = {
               "Content-Type"    => "application/x-www-form-urlencoded",
