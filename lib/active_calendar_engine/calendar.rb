@@ -22,9 +22,13 @@ module ActiveCalendarEngine
       self.inspect
     end
     
+    def events
+      self.class.parse_single_calendar( self.class.find( self.links[:self] ) )
+    end
+    
     class << self
       def calendars
-        return self.find_calendars
+        return self.find(:all)
       end
       
       def find(*args)
@@ -48,7 +52,7 @@ module ActiveCalendarEngine
     private
     
       def initialize_calendar_properties
-        @links        = []
+        @links        = {}
         @author       = {:email => "", :name => ""}
         @id           = String.new
         @title        = String.new
@@ -78,12 +82,10 @@ module ActiveCalendarEngine
               author_data[eval(":#{child.name}")] = child.text unless child.name == "text"
             end
             
-            link_data = []
+            link_data = {}
             entry.css('link').each do |link|
-              new_link = {}
               unless link.attribute('rel').value =~ /http/
-                new_link[eval(":#{link.attribute('rel').value}")] = link.attribute('href').value
-                link_data << new_link
+                link_data[eval(":#{link.attribute('rel').value}")] = link.attribute('href').value
               end
             end
             # --
@@ -104,17 +106,7 @@ module ActiveCalendarEngine
           
           return calendars
         end
-        
-        def find_calendars
-          self.parse_calendar_data(
-            self.find(
-              :all,
-              :google_feed    => @google_feed,
-              :google_service => @google_service
-            )[:data]
-          )
-        end
-        
+             
       end # class << self
     # private
   end
