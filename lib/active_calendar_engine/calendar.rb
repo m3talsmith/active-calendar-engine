@@ -6,7 +6,7 @@ module ActiveCalendarEngine
     attr_accessors(
       :links, :author, :id,
       :published_on, :updated_on, :title,
-      :timezone, :access_level, :summary
+      :timezone, :access_level, :summary, :raw_data
     )
     
     def initialize(*args)
@@ -41,6 +41,7 @@ module ActiveCalendarEngine
         %w(published updated).each do |dated|
           instance_variable_set("@#{dated}_on", Time.now.xmlschema)
         end
+        @raw_data     = ""
       end
       
       class << self
@@ -69,11 +70,12 @@ module ActiveCalendarEngine
             # --
             
             calendars << self.new(
+              :raw_data     => entry,
               :id           => entry.css('id').first.content,
               :author       => author_data,
               :access_level => "#{entry.xpath('//gCal:accesslevel').first.attribute('value')}",
               :summary      => (entry.xpath('//summary').length > 0 ? entry.xpath('//summary').first.content : nil),
-              :title        => entry.css('title'),
+              :title        => entry.css('title').first.content,
               :timezone     => "#{entry.xpath('//gCal:timezone').first.attribute('value')}",
               :published_on => entry.css('published').first.content,
               :updated_on   => entry.css('updated').first.content,
