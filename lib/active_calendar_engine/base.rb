@@ -38,6 +38,12 @@ module ActiveCalendarEngine
         when :all
           response, data = get_authenticated_feed(@google_feed)
           @data = {:response => response, :data => data}
+        when :first
+          response, data = get_authenticated_feed(args.first)
+          @data = {:response => response, :data => data}
+        else
+          response, data = get_authenticated_feed(args.first)
+          @data = {:response => response, :data => data}
         end
 
         return @data ? @data : false
@@ -112,32 +118,23 @@ module ActiveCalendarEngine
         def get_feed(uri = "", headers = {})
           
           uri = URI.parse(uri)
+          response = ""
           
           unless @gsession_url && @gsession_id
             http = Net::HTTP.new(uri.host, uri.port)
-            initial_response = http.get(uri.path, headers)
+            response = http.get(uri.path, headers)
 
-            if initial_response.body =~ /The document has moved <A HREF=\"(.+)\?gsessionid=(.+)\">here<\/A>./
-              @gsession_url = $1
-              @gsession_id = $2
-            else
-              raise \
-                "Can't load feed:\n" \
-                "\tURI: #{uri.host}#{uri.path}\n" \
-                "\tHeader: #{headers}\n" \
-                "\tResponse: #{initial_response.value} - #{initial_response.message}"
+            if response.body =~ /The document has moved <A HREF=\"(.+)\?gsessionid=(.+)\">here<\/A>./
+              uri = URI.parse($1)
+              response = http.get("#{uri.path}?gsessionid=#{$2}", headers)
             end
           end
-          
-          uri = URI.parse(@gsession_url)
-          response = http.get("#{uri.path}?gsessionid=#{@gsession_id}", headers)
           
           if response.body =~ /xmlns:gCal/
             return response
           else
             raise \
               "Can't load feed:\n" \
-              "\tURI: #{uri.host}#{uri.path}?gsessionid=#{@gsession_id}\n" \
               "\tHeader: #{headers}\n" \
               "\tResponse: #{response.value} - #{response.message}"
           end

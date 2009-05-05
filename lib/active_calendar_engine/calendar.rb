@@ -26,6 +26,23 @@ module ActiveCalendarEngine
       def calendars
         return self.find_calendars
       end
+      
+      def find(*args)
+        options = args.extract_options!
+        
+        case args.first
+        when :all
+          super args.first, options
+          return parse_calendar_data(@data[:data])
+        when :first
+          super args.first
+          return parse_single_calendar(@data[:data])
+        else
+          super args.first
+          return parse_single_calendar(@data[:data])
+        end
+      end
+        
     end
     
     private
@@ -45,6 +62,8 @@ module ActiveCalendarEngine
       end
       
       class << self
+        def parse_single_calendar(data)
+        end
         
         def parse_calendar_data(data)
           calendars = []
