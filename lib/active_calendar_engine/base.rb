@@ -1,4 +1,5 @@
 require "active_support"
+require "nokogiri"
 require "active_calendar_engine/tools/accessor"
 
 Net::HTTP.version_1_2
