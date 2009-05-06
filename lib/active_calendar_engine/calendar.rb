@@ -20,6 +20,8 @@ module ActiveCalendarEngine
       attributes.each_pair do |key, value|
         instance_variable_set("@#{key}", value) if instance_variable_get("@#{key}")
       end
+      
+      # self.events
     end
     
     def to_s
@@ -27,7 +29,7 @@ module ActiveCalendarEngine
     end
     
     def events
-      @events ||= Event.find_and_extract_events( self.links[:alternate] )
+      @events = Event.find_and_extract_events( self.links[:alternate] )
     end
     
     class << self
@@ -103,8 +105,8 @@ module ActiveCalendarEngine
               :summary      => (entry.xpath('//summary').length > 0 ? entry.xpath('//summary').first.content : nil),
               :title        => entry.css('title').first.content,
               :timezone     => "#{entry.xpath('//gCal:timezone').first.attribute('value')}",
-              :published_on => entry.css('published').first.content,
-              :updated_on   => entry.css('updated').first.content,
+              :published_on => Time.xmlschema(entry.css('published').first.content),
+              :updated_on   => Time.xmlschema(entry.css('updated').first.content),
               :links        => link_data
             )
             calendar.id = link_data[:self]

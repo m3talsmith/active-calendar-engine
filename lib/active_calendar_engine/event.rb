@@ -42,7 +42,7 @@ module ActiveCalendarEngine
         @author       = {:email => "", :name => ""}
         @who          = [] # {:email => "", :name => "", :status => ""}
         @where        = String.new
-        @when         = {:start_time => Time.now.xmlschema, :end_time => Time.new.in(3600).xmlschema, :reminders => []}
+        @when         = {}
         @event_status = "confirmed"
         @id           = String.new
         @title        = String.new
@@ -92,8 +92,8 @@ module ActiveCalendarEngine
             whin = entry.xpath('//gd:when').first
             whin_data = {}
             whin_data = {
-              :start_time => whin.attribute('startTime').value,
-              :end_time   => whin.attribute('endTime').value,
+              :start_time => Time.xmlschema(whin.attribute('startTime').value),
+              :end_time   => Time.xmlschema(whin.attribute('endTime').value),
               :reminders  => []
             }
               
@@ -117,9 +117,9 @@ module ActiveCalendarEngine
               :when         => whin_data,
               :event_status => entry.xpath('//gd:eventStatus').first.attribute('value').value.split(".").last,
               :title        => entry.css('title').first.content,
-              :content      => (entry.xpath('//content').length > 0 ? entry.xpath('//content').first.content : nil),
-              :published_on => entry.css('published').first.content,
-              :updated_on   => entry.css('updated').first.content,
+              :content      => (entry.css('content').length > 0 ? entry.css('content').first.content : nil),
+              :published_on => Time.xmlschema(entry.css('published').first.content),
+              :updated_on   => Time.xmlschema(entry.css('updated').first.content),
               :links        => link_data
             )
             event.id = link_data[:alternate]

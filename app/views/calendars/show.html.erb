@@ -1,0 +1,15 @@
+<h1>Showing <%= @calendar.title %></h1>
+<h2>Events</h2>
+<ul class="events">
+  <% @calendar.events.each do |event| %>
+    <!-- <%= event.raw_data %> -->
+    <li class="event">
+      <ul>
+        <li><%= event.title %></li>
+        <li>Starts: <%= event.when[:start_time] %>, Ends: <%= event.when[:end_time] %></li>
+        <li><%= event.where %></li>
+        <li><%= event.content %></li>
+      </ul>
+    </li>
+  <% end %>
+</ul>
