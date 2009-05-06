@@ -28,6 +28,26 @@ module ActiveCalendarEngine
       end
     end
     
+    def to_s
+      self.inspect
+    end
+    
+    # -- id  methods --
+    # I needed to add these because Rails routing would blow up if a qualified
+    # url were added as an id.
+    def id
+      return @id
+    end
+    
+    def id=(google_id)
+      @id = self.class.escape_id(google_id)
+    end
+    
+    def feed_id
+      return self.class.unescape_id(self.id)
+    end
+    # --
+    
     class << self
       
       def find(*args)
@@ -45,8 +65,16 @@ module ActiveCalendarEngine
           response, data = get_authenticated_feed(args.first)
           @data = {:response => response, :data => data}
         end
-
+        
         return @data ? @data : false
+      end
+      
+      def unescape_id(id)
+        return id.gsub("%2F", "/").gsub("%3A", ":").gsub("%2E", ".")
+      end
+      
+      def escape_id(id)
+        return id.gsub("/", "%2F").gsub(":", "%3A").gsub(".", "%2E")
       end
       
       def has_google_options(*args)

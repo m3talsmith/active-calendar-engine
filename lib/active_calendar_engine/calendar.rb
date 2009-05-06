@@ -1,12 +1,16 @@
+require 'active_calendar_engine/event'
+
+class Event < ActiveCalendarEngine::Event; end
+
 module ActiveCalendarEngine
   class Calendar < ActiveCalendarEngine::Base
     
     has_google_options :google_service => "cl", :google_feed => "http://www.google.com/calendar/feeds/default/allcalendars/full"
     
     attr_accessors(
-      :links, :author, :id,
+      :links, :author,
       :published_on, :updated_on, :title,
-      :timezone, :access_level, :summary, :raw_data
+      :timezone, :access_level, :summary, :raw_data, :events
     )
     
     def initialize(*args)
@@ -23,10 +27,11 @@ module ActiveCalendarEngine
     end
     
     def events
-      self.class.parse_single_calendar( self.class.find( self.links[:self] ) )
+      @events ||= Event.find_and_extract_events( self.links[:alternate] )
     end
     
     class << self
+      
       def calendars
         return self.find(:all)
       end
@@ -39,10 +44,10 @@ module ActiveCalendarEngine
           super args.first, options
           return parse_calendar_data(@data[:data])
         when :first
-          super args.first
+          super self.unescape_id(args.first)
           return parse_single_calendar(@data[:data])
         else
-          super args.first
+          super self.unescape_id(args.first)
           return parse_single_calendar(@data[:data])
         end
       end
@@ -67,6 +72,7 @@ module ActiveCalendarEngine
       
       class << self
         def parse_single_calendar(data)
+          return self.parse_calendar_data(data).first
         end
         
         def parse_calendar_data(data)
@@ -90,9 +96,8 @@ module ActiveCalendarEngine
             end
             # --
             
-            calendars << self.new(
+            calendar = self.new(
               :raw_data     => entry,
-              :id           => entry.css('id').first.content,
               :author       => author_data,
               :access_level => "#{entry.xpath('//gCal:accesslevel').first.attribute('value')}",
               :summary      => (entry.xpath('//summary').length > 0 ? entry.xpath('//summary').first.content : nil),
@@ -102,6 +107,9 @@ module ActiveCalendarEngine
               :updated_on   => entry.css('updated').first.content,
               :links        => link_data
             )
+            calendar.id = link_data[:self]
+            
+            calendars << calendar
           end
           
           return calendars
